@@ -1,10 +1,5 @@
-"use client";
-import Leaderboard from "@/components/leaderboard";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-
-    return(
-        <Leaderboard />
-    )
-
+    redirect("/");
 }

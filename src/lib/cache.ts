@@ -1,29 +1,26 @@
-import clientPromise from '@/lib/mongodb';
+import { baseSections } from '@/lib/sections';
 
-let cachedScores = null;
-let lastUpdated = 0;
+let cachedScores = baseSections.map((s) => ({ ...s }));
+
+export async function refreshData() {
+    cachedScores = baseSections.map((s) => ({ ...s }));
+}
 
 export async function getCachedScores() {
-    const now = Date.now();
-    if (!cachedScores || now - lastUpdated > 60000) {
-        await refreshData();
-    }
     return cachedScores;
 }
 
-async function refreshData() {
-    try {
-        const client = await clientPromise;
-        const db = client.db('test');
-        const collection = db.collection('leaderboards');
-        cachedScores = await collection.find({}).toArray();
-        lastUpdated = Date.now();
-    } catch (e) {
-        console.error(e);
-        return new Response(JSON.stringify({ message: 'Internal Server Error' }), {
-            status: 500,
-        });
-    }
-}
+export async function setCachedScores(updates) {
+    const allowed = new Set(baseSections.map((s) => s.section));
+    const updateMap = new Map(
+        (updates || [])
+            .filter((u) => u && allowed.has(u.section) && Number.isFinite(Number(u.score)))
+            .map((u) => [u.section, Number(u.score)])
+    );
 
-setInterval(refreshData, 60000);
+    cachedScores = baseSections.map((base) => ({
+        ...base,
+        score: updateMap.has(base.section) ? updateMap.get(base.section) : base.score,
+    }));
+    return cachedScores;
+}
