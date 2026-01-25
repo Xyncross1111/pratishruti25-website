@@ -32,5 +32,4 @@ export const baseSections = [
   { section: "S1", score: 50 },
   { section: "BBA A", score: 69 },
   { section: "BBA B", score: 50 },
-  { section: "BCA", score: 0 },
 ];
